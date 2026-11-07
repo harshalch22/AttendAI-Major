@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Live Monitor — AttendAI Pro{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Live Monitor</h2>
+  <span class="page-sub">Class: <strong style="color:var(--green)">{{ class_name }}</strong></span>
+</div>
+
+<div class="monitor-grid">
+  <div class="feed-card">
+    <div class="feed-wrap">
+      <img src="{{ url_for('video_feed') }}" alt="Live Feed" id="feed">
+      <div class="live-badge">● LIVE</div>
+    </div>
+    <p class="feed-note">
+      <span style="color:var(--green)">■</span> Green box = Recognised student &nbsp;|&nbsp;
+      <span style="color:#f55">■</span> Red box = Unknown &nbsp;|&nbsp;
+      <span style="color:#f5b731">⚠</span> Head down warning &nbsp;|&nbsp;
+      <span style="color:#f55">📱</span> Mobile detection
+    </p>
+  </div>
+
+  <div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">🔔 Live Alerts</div>
+      <div id="alertBox" style="max-height:200px;overflow-y:auto;">
+        <div class="hint">Waiting for alerts...</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">Detection Key</div>
+      <ul class="tips-list">
+        <li>✅ Face recognised → attendance marked</li>
+        <li>😊 Emotion detected (7 types)</li>
+        <li>📱 Mobile phone → alert logged</li>
+        <li>⚠ Head down 5s+ → alert logged</li>
+        <li>Same student not marked twice per day</li>
+      </ul>
+    </div>
+
+    <a href="{{ url_for('attendance') }}"    class="btn btn-primary w-full">📋 Attendance Report</a>
+    <a href="{{ url_for('mobile_report') }}" class="btn btn-secondary w-full">📱 Mobile Report</a>
+    <a href="{{ url_for('select_class') }}"  class="btn btn-secondary w-full">🔄 Change Class</a>
+  </div>
+</div>
+
+<script>
+// Poll for live alerts every 5 seconds
+async function fetchAlerts() {
+  try {
+    const res = await fetch('/api/alerts');
+    const alerts = await res.json();
+    const box = document.getElementById('alertBox');
+    if (!alerts.length) return;
+    box.innerHTML = alerts.map(a => `
+      <div class="alert-item ${a.alert_type === 'MOBILE' ? 'alert-mobile' : 'alert-head'}">
+        <strong>${a.alert_type === 'MOBILE' ? '📱' : '⚠'} ${a.student_name || '?'}</strong>
+        <span>${a.message}</span>
+        <small>${a.time}</small>
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+fetchAlerts();
+setInterval(fetchAlerts, 5000);
+</script>
+{% endblock %}

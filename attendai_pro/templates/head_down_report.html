@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Head Down Report — AttendAI Pro{% endblock %}
+{% block content %}
+<div class="page-header"><h2>⚠ Head Down Report</h2><span class="page-sub">Distraction & inattentiveness log</span></div>
+<form method="GET" class="filter-row">
+  <input type="date" name="date" value="{{ date }}">
+  <select name="class_name">
+    <option value="">All Classes</option>
+    {% for c in classes %}<option value="{{ c.name }}" {% if class_name==c.name %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+{% if records %}
+<p class="count-line">{{ records|length }} incident(s) on {{ date }}</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Date</th><th>Time</th><th>Duration</th></tr></thead>
+  <tbody>{% for r in records %}<tr>
+    <td>{{ loop.index }}</td>
+    <td><strong>{{ r.student_name }}</strong></td>
+    <td><span class="badge badge-blue">{{ r.class_name }}</span></td>
+    <td>{{ r.date }}</td><td>{{ r.time }}</td>
+    <td>
+      {% if r.duration_sec > 30 %}<span class="badge badge-red">{{ r.duration_sec }}s ⚠ Long</span>
+      {% else %}<span class="badge badge-yellow">{{ r.duration_sec }}s</span>{% endif %}
+    </td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<div class="empty">No head-down incidents on {{ date }}. 🎉</div>{% endif %}
+{% endblock %}

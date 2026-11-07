@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Mobile Report — AttendAI Pro{% endblock %}
+{% block content %}
+<div class="page-header"><h2>📱 Mobile Usage Report</h2><span class="page-sub">Track phone usage during class</span></div>
+<form method="GET" class="filter-row">
+  <input type="date" name="date" value="{{ date }}">
+  <select name="class_name">
+    <option value="">All Classes</option>
+    {% for c in classes %}<option value="{{ c.name }}" {% if class_name==c.name %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+{% if records %}
+<p class="count-line">{{ records|length }} student(s) used mobile on {{ date }}</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Date</th><th>First Seen</th><th>Last Seen</th><th>Total Time</th></tr></thead>
+  <tbody>{% for r in records %}
+  <tr>
+    <td>{{ loop.index }}</td>
+    <td><strong>{{ r.student_name }}</strong></td>
+    <td><span class="badge badge-blue">{{ r.class_name }}</span></td>
+    <td>{{ r.date }}</td>
+    <td>{{ r.first_seen }}</td>
+    <td>{{ r.last_seen }}</td>
+    <td>
+      {% set mins = (r.total_seconds // 60) %}
+      {% set secs = (r.total_seconds % 60) %}
+      {% if mins > 5 %}
+        <span class="badge badge-red">{{ mins }}m {{ secs }}s ⚠</span>
+      {% elif mins > 0 %}
+        <span class="badge badge-yellow">{{ mins }}m {{ secs }}s</span>
+      {% else %}
+        <span class="badge badge-grey">{{ secs }}s</span>
+      {% endif %}
+    </td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<div class="empty">No mobile usage recorded for {{ date }}. 🎉</div>{% endif %}
+{% endblock %}

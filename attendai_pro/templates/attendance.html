@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Attendance — AttendAI Pro{% endblock %}
+{% block content %}
+<div class="page-header"><h2>Attendance Report</h2></div>
+<form method="GET" class="filter-row">
+  <input type="date" name="date" value="{{ date }}">
+  <select name="class_id">
+    <option value="">All Classes</option>
+    {% for c in classes %}<option value="{{ c.id }}" {% if class_id == c.id|string %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+{% if records %}
+<p class="count-line">{{ records|length }} record(s)</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>#</th><th>Name</th><th>Class</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+  <tbody>{% for r in records %}<tr>
+    <td>{{ loop.index }}</td><td><strong>{{ r.name }}</strong></td>
+    <td><span class="badge badge-blue">{{ r.class_name }}</span></td>
+    <td>{{ r.date }}</td><td>{{ r.time }}</td>
+    <td><span class="badge badge-green">{{ r.status }}</span></td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<div class="empty">No records for {{ date }}.</div>{% endif %}
+{% endblock %}

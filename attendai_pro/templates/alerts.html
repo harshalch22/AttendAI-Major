@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Alerts — AttendAI Pro{% endblock %}
+{% block content %}
+<div class="page-header"><h2>🔔 All Alerts</h2><span class="page-sub">Recent system alerts</span></div>
+{% if records %}
+<div class="table-wrap"><table>
+  <thead><tr><th>#</th><th>Type</th><th>Student</th><th>Class</th><th>Message</th><th>Date</th><th>Time</th></tr></thead>
+  <tbody>{% for r in records %}<tr>
+    <td>{{ loop.index }}</td>
+    <td>{% if r.alert_type=='MOBILE' %}<span class="badge badge-red">📱 Mobile</span>
+        {% elif r.alert_type=='HEAD_DOWN' %}<span class="badge badge-yellow">⚠ Head Down</span>
+        {% else %}<span class="badge badge-grey">{{ r.alert_type }}</span>{% endif %}</td>
+    <td><strong>{{ r.student_name or '—' }}</strong></td>
+    <td>{{ r.class_name or '—' }}</td>
+    <td>{{ r.message }}</td>
+    <td>{{ r.date }}</td><td>{{ r.time }}</td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<div class="empty">No alerts recorded yet.</div>{% endif %}
+{% endblock %}

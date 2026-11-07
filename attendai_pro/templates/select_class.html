@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Select Class — AttendAI Pro{% endblock %}
+{% block content %}
+<div class="page-header"><h2>Select Class for Attendance</h2><span class="page-sub">Choose which class to take attendance for</span></div>
+
+{% if classes %}
+<div class="class-grid">
+  {% for c in classes %}
+  <a href="{{ url_for('start', class_id=c.id) }}" class="class-tile">
+    <div class="class-tile-name">{{ c.name }}</div>
+    <div class="class-tile-dept">{{ c.department }}</div>
+    <div class="class-tile-year">{{ c.year }}</div>
+    <div class="class-tile-btn">▶ Start Session</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">No classes found. <a href="{{ url_for('classes') }}">Create a class first →</a></div>
+{% endif %}
+{% endblock %}

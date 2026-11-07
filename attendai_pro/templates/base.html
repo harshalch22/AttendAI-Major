@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AttendAI Pro{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+{% if session.get('logged_in') %}
+<nav class="navbar">
+  <a href="{{ url_for('dashboard') }}" class="brand">
+    <span class="brand-dot"></span> AttendAI <span class="brand-pro">PRO</span>
+  </a>
+  <div class="nav-links">
+    <a href="{{ url_for('dashboard') }}"      class="nav-link {% if request.endpoint=='dashboard'       %}active{% endif %}">Dashboard</a>
+    <a href="{{ url_for('classes') }}"        class="nav-link {% if request.endpoint=='classes'         %}active{% endif %}">Classes</a>
+    <a href="{{ url_for('register') }}"       class="nav-link {% if request.endpoint=='register'        %}active{% endif %}">Students</a>
+    <a href="{{ url_for('attendance') }}"     class="nav-link {% if request.endpoint=='attendance'      %}active{% endif %}">Attendance</a>
+    <a href="{{ url_for('emotions') }}"       class="nav-link {% if request.endpoint=='emotions'        %}active{% endif %}">Emotions</a>
+    <a href="{{ url_for('mobile_report') }}"  class="nav-link {% if request.endpoint=='mobile_report'  %}active{% endif %}">📱 Mobile</a>
+    <a href="{{ url_for('head_down_report') }}" class="nav-link {% if request.endpoint=='head_down_report' %}active{% endif %}">⚠ HeadDown</a>
+    <a href="{{ url_for('alerts') }}"         class="nav-link {% if request.endpoint=='alerts'          %}active{% endif %}">🔔 Alerts</a>
+    <a href="{{ url_for('select_class') }}"   class="nav-btn">▶ Start Session</a>
+    <a href="{{ url_for('logout') }}"         class="nav-link nav-out">Logout</a>
+  </div>
+</nav>
+{% endif %}
+
+<div class="page-wrap">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Students — AttendAI Pro{% endblock %}
+{% block content %}
+<div class="page-header"><h2>Student Registration</h2><span class="page-sub">Add students and capture their faces</span></div>
+
+<div class="two-col">
+  <!-- Step 1 -->
+  <div class="card">
+    <div class="card-title">Step 1 — Add Student</div>
+    {% if not classes %}
+      <div class="alert alert-warning">⚠ No classes found. <a href="{{ url_for('classes') }}">Create a class first →</a></div>
+    {% else %}
+    <form method="POST">
+      <div class="field"><label>Full Name</label>
+        <input type="text" name="name" placeholder="e.g. Harsh Sharma" required></div>
+      <div class="field"><label>Roll Number</label>
+        <input type="text" name="roll_no" placeholder="e.g. CS21B001" required></div>
+      <div class="field"><label>Class / Division</label>
+        <select name="class_id" required>
+          <option value="">-- Select Class --</option>
+          {% for c in classes %}<option value="{{ c.id }}">{{ c.name }} — {{ c.department }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Student</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <!-- Step 2: Face Capture -->
+  <div class="card">
+    <div class="card-title">Step 2 — Capture Face (min 8 images for high accuracy)</div>
+    <div class="field"><label>Select Student</label>
+      <select id="studentSelect">
+        <option value="">-- select --</option>
+        {% for s in students %}<option value="{{ s.name }}">{{ s.name }} ({{ s.class_name }}) — {{ s.face_count }} imgs</option>{% endfor %}
+      </select>
+    </div>
+    <video id="webcam" autoplay playsinline style="width:100%;border-radius:8px;background:#000;min-height:180px;"></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <div style="display:flex;gap:.6rem;margin-top:.75rem;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="openCamera()">📷 Open Camera</button>
+      <button class="btn btn-success"   onclick="captureImage()">✅ Capture</button>
+    </div>
+    <div style="margin-top:.75rem;">
+      <div class="prog-bar-bg"><div class="prog-bar-fill" id="progFill" style="width:0%"></div></div>
+      <div id="progText" class="hint" style="margin-top:.3rem;">0 / 8 images</div>
+    </div>
+    <div id="captureMsg" class="capture-msg"></div>
+  </div>
+</div>
+
+<!-- Filter by class -->
+<div class="section-label" style="margin-top:1.5rem;">
+  All Students
+  <span style="margin-left:1rem;">
+    {% for c in classes %}
+      <a href="{{ url_for('register') }}?class_id={{ c.id }}"
+         class="btn btn-secondary" style="padding:.2rem .6rem;font-size:.78rem;margin-right:.3rem;
+         {% if filter_class == c.id|string %}border-color:var(--green);color:var(--green);{% endif %}">
+        {{ c.name }}
+      </a>
+    {% endfor %}
+    <a href="{{ url_for('register') }}" class="btn btn-secondary" style="padding:.2rem .6rem;font-size:.78rem;">All</a>
+  </span>
+</div>
+
+{% if students %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>Name</th><th>Roll No.</th><th>Class</th><th>Face Images</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for s in students %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td><strong>{{ s.name }}</strong></td>
+        <td><code>{{ s.roll_no }}</code></td>
+        <td><span class="badge badge-blue">{{ s.class_name }}</span></td>
+        <td>
+          {% if s.face_count >= 8 %}<span class="badge badge-green">{{ s.face_count }} ✓ High Accuracy</span>
+          {% elif s.face_count >= 5 %}<span class="badge badge-yellow">{{ s.face_count }} / 8</span>
+          {% elif s.face_count > 0 %}<span class="badge badge-orange">{{ s.face_count }} / 8 Low</span>
+          {% else %}<span class="badge badge-red">No Images</span>{% endif %}
+        </td>
+        <td>
+          <a href="{{ url_for('delete_student_route', student_id=s.id) }}" class="btn btn-danger"
+             style="padding:.2rem .5rem;font-size:.8rem;"
+             onclick="return confirm('Delete {{ s.name }}?')">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}<div class="empty">No students found.</div>{% endif %}
+
+<script>
+let count = 0, MAX = 8;
+async function openCamera() {
+  try {
+    document.getElementById('webcam').srcObject = await navigator.mediaDevices.getUserMedia({video:true});
+    showMsg('Camera ready.', 'ok');
+  } catch(e) { showMsg('Camera error: '+e.message, 'err'); }
+}
+async function captureImage() {
+  const name = document.getElementById('studentSelect').value;
+  if (!name) { showMsg('Select a student first.', 'err'); return; }
+  if (count >= MAX) { showMsg('8 images already captured!', 'ok'); return; }
+  const v = document.getElementById('webcam'), c = document.getElementById('canvas');
+  if (!v.srcObject) { showMsg('Open camera first.', 'err'); return; }
+  c.width = v.videoWidth||640; c.height = v.videoHeight||480;
+  c.getContext('2d').drawImage(v,0,0);
+  showMsg('Saving...', 'ok');
+  const res = await fetch('/capture_face', {method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name, image: c.toDataURL('image/jpeg',0.92)})});
+  const d = await res.json();
+  if (d.ok) {
+    count++;
+    document.getElementById('progFill').style.width = (count/MAX*100)+'%';
+    document.getElementById('progText').textContent = count+' / '+MAX+' images';
+    showMsg(d.message, 'ok');
+  } else { showMsg('❌ '+d.message, 'err'); }
+}
+function showMsg(m,t){ const e=document.getElementById('captureMsg'); e.textContent=m; e.className='capture-msg '+(t==='ok'?'msg-ok':'msg-err'); }
+</script>
+{% endblock %}

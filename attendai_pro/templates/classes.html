@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Classes — AttendAI Pro{% endblock %}
+{% block content %}
+<div class="page-header"><h2>Classes & Divisions</h2><span class="page-sub">Manage your class sections</span></div>
+
+<div class="two-col">
+  <div class="card">
+    <div class="card-title">Add New Class</div>
+    <form method="POST">
+      <div class="field"><label>Class Name</label>
+        <input type="text" name="name" placeholder="e.g. CS-A, IT-B, MECH-3" required></div>
+      <div class="field"><label>Department</label>
+        <input type="text" name="department" placeholder="e.g. Computer Science" required></div>
+      <div class="field"><label>Year / Semester</label>
+        <input type="text" name="year" placeholder="e.g. 2nd Year, Sem 4" required></div>
+      <button type="submit" class="btn btn-primary">Add Class</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">All Classes ({{ classes|length }})</div>
+    {% if classes %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Department</th><th>Year</th><th>Students</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for c in classes %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td><strong>{{ c.name }}</strong></td>
+            <td>{{ c.department }}</td>
+            <td>{{ c.year }}</td>
+            <td><span class="badge badge-blue">{{ c.student_count }}</span></td>
+            <td>
+              <a href="{{ url_for('register') }}?class_id={{ c.id }}" class="btn btn-secondary" style="padding:.2rem .5rem;font-size:.8rem;">View</a>
+              <a href="{{ url_for('delete_class_route', class_id=c.id) }}" class="btn btn-danger" style="padding:.2rem .5rem;font-size:.8rem;"
+                 onclick="return confirm('Delete class {{ c.name }}?')">Del</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<div class="empty">No classes yet. Add one above.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

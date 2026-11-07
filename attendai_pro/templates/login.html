@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Login — AttendAI Pro{% endblock %}
+{% block content %}
+<div class="login-center">
+  <div class="login-box">
+    <div class="login-icon">◉</div>
+    <h1 class="login-title">AttendAI <span style="color:#f5b731">Pro</span></h1>
+    <p class="login-sub">AI Attendance & Engagement Monitoring System</p>
+    {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+    <form method="POST">
+      <div class="field"><label>Username</label>
+        <input type="text" name="username" placeholder="admin" autofocus required></div>
+      <div class="field"><label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required></div>
+      <button type="submit" class="btn btn-primary w-full">Login →</button>
+    </form>
+    <p class="hint" style="margin-top:1rem;">Credentials: <code>admin</code> / <code>admin123</code></p>
+  </div>
+</div>
+{% endblock %}
